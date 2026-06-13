@@ -1,0 +1,106 @@
+# =============================================================================
+# MOSAIC Example Configuration — Breast Cancer (10x Visium)
+# =============================================================================
+# This is a complete, self-contained config for the breast cancer dataset.
+# Copy and modify this file for your own datasets.
+#
+# Usage:
+#   mosaic preprocess --config mosaic/configs/examples/breast_cancer_visium.yaml
+#   mosaic train      --config mosaic/configs/examples/breast_cancer_visium.yaml --device cuda
+#   mosaic evaluate   --config mosaic/configs/examples/breast_cancer_visium.yaml --device cuda
+#   mosaic run        --config mosaic/configs/examples/breast_cancer_visium.yaml --device cuda
+# =============================================================================
+
+dataset: breast_new
+technology: visium
+organism: human
+
+# -- Paths (relative to root's parent directory) --
+# All paths are resolved as: Path(root).parent / <relative_path>
+# For MOSAIC package: root = MOSAIC/, so root.parent = CCC/
+paths:
+  root: MOSAIC
+  raw_adata:          src5/data/raw/breast_new.h5ad
+  lr_database:        src5/data/raw/CellNEST_database.csv
+  met_database:       src5/data/raw/M_R.txt
+  scfea_balance:      src5/data/raw/scfea_balance_breast_new.csv
+  protein_emb_dir:    src5/data/embeddings/proteins
+  metabolite_emb_dir: src5/data/embeddings/metabolites
+  processed_dir:      MOSAIC/data/processed
+
+# -- Spatial technology (Visium: 55µm spots) --
+spatial:
+  spot_diameter_um: 55.0
+  um_per_pixel: 0.2917
+  graph_method: knn
+  k_neighbors: 6
+  max_distance_um: 150.0
+  contact_threshold_um: 87.0
+  secreted_threshold_um: 150.0
+  metabolite_threshold_um: 150.0
+  metabolite_flux_quantile: 0.50
+  require_gene_presence: true
+
+# -- Node features (pre-trained, frozen) --
+node_features:
+  cell_dim: 128          # scVI latent
+  gene_dim: 1280         # ESM-2 (esm2_t33_650M_UR50D)
+  metabolite_dim: 600    # ChemBERTa-77M-MTR
+
+# -- Cell-gene edge construction --
+cell_gene_edges:
+  top_k_per_cell: 500
+  min_expr_quantile: 0.5
+
+# -- LR database --
+lr_database:
+  source_name: CellNEST
+  symmetric_dedup: true
+  technology_filter: false
+
+# -- Metabolite database --
+metabolite_database:
+  source_name: scFEA+MR
+  flux_quantile_edge: 0.50
+  flux_quantile_label: 0.75
+
+# -- scFEA --
+scfea:
+  use_existing: true
+  skip_rerun: true
+
+# -- Expression labels --
+labels:
+  n_target_genes: 200
+  n_lr_pairs: null
+
+# -- Model architecture --
+model:
+  hidden_dim: 256
+  n_heads: 4
+  n_layers: 2
+  dropout: 0.1
+  ffn_ratio: 4.0
+  decoder_dims: [256]
+  decoder_dropout: 0.2
+
+# -- Training --
+training:
+  epochs: 500
+  lr: 0.001
+  weight_decay: 1.0e-4
+  batch_size: null         # full-graph transductive
+  grad_clip: 5.0
+  expr_loss: huber
+  patience: 50
+  scheduler: plateau
+  scheduler_factor: 0.5
+  scheduler_patience: 15
+  checkpoint_dir: MOSAIC/checkpoints
+  lambda_spatial: 0.0
+
+# -- Evaluation --
+evaluation:
+  des_n_permutations: 1000
+  recall_k_values: [100, 500, 1000]
+  n_clusters: 10

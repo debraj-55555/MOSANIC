@@ -1,0 +1,48 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+*.egg-info/
+*.egg
+.eggs/
+build/
+dist/
+
+# Notebook checkpoints
+.ipynb_checkpoints/
+
+# Virtualenv
+venv/
+env/
+.venv/
+
+# Editor
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# MOSAIC runtime artifacts (regenerated; never committed)
+mosaic_tutorial/
+mosaic_output/
+output/
+logs/
+checkpoints/
+*.pt
+*.h5ad
+*.npz
+
+# Tutorial outputs (regenerated each run)
+top100_lr.csv
+top50_mr.csv
+comm_matrix.csv
+
+# Data — never commit
+data/raw/
+data/processed/

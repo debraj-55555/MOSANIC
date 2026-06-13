@@ -1,0 +1,76 @@
+[build-system]
+requires = ["setuptools>=64", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "mosaic-ccc"
+version = "1.0.0"
+description = "MOSAIC: Multi-Omic Spatial Attention for Intercellular Communication"
+readme = "README.md"
+requires-python = ">=3.9"
+license = {text = "MIT"}
+authors = [{name = "MOSAIC Team"}]
+keywords = [
+    "spatial transcriptomics", "cell-cell communication", "graph transformer",
+    "single cell", "multi-omics", "ligand-receptor", "metabolite-receptor",
+]
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Topic :: Scientific/Engineering :: Bio-Informatics",
+]
+dependencies = [
+    # Core deep-learning stack
+    "torch>=2.0",
+    "torch-geometric>=2.4",
+    # Numerical + data
+    "numpy>=1.24",
+    "scipy>=1.10",
+    "pandas>=2.0",
+    "scikit-learn>=1.3",
+    # Single-cell / spatial
+    "scanpy>=1.9",
+    "anndata>=0.10",
+    "scvi-tools>=1.0",
+    # Foundation-model embedders
+    "fair-esm>=2.0",        # ESM-2 protein embeddings
+    "transformers>=4.30",   # ChemBERTa metabolite embeddings
+    # Bundled scFEA flux estimator dependencies (mosaic/external/scfea/)
+    "magic-impute>=3.0",
+    "tqdm>=4.60",
+    # Configuration + plotting
+    "pyyaml>=6.0",
+    "matplotlib>=3.7",
+    "seaborn>=0.12",
+]
+
+[project.optional-dependencies]
+dev = ["pytest", "pytest-cov", "black", "ruff", "mypy"]
+
+[project.scripts]
+mosaic = "mosaic.cli:main"
+
+[project.urls]
+Homepage      = "https://github.com/<your-org>/MOSAIC"
+Documentation = "https://github.com/<your-org>/MOSAIC#readme"
+Repository    = "https://github.com/<your-org>/MOSAIC"
+"Bug Tracker" = "https://github.com/<your-org>/MOSAIC/issues"
+
+[tool.setuptools.packages.find]
+where   = ["."]
+include = ["mosaic*"]
+
+[tool.setuptools.package-data]
+mosaic = [
+    "configs/*.yaml",
+    "configs/*/*.yaml",
+    "external/scfea/data/**/*",
+    "external/scfea/src/*.py",
+    "databases/*.csv",
+    "databases/*.txt",
+]

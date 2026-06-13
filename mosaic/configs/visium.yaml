@@ -1,0 +1,13 @@
+# Visium-specific settings
+technology: visium
+
+spatial:
+  spot_diameter_um: 55.0
+  graph_method: knn
+  k_neighbors: 6
+  max_distance_um: 150.0
+  contact_threshold_um: 87.0
+  secreted_threshold_um: 150.0
+  metabolite_threshold_um: 150.0
+  metabolite_flux_quantile: 0.50
+  require_gene_presence: true

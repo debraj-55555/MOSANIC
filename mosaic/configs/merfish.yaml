@@ -1,0 +1,18 @@
+# MERFISH-specific settings
+technology: merfish
+
+spatial:
+  spot_diameter_um: 10.0
+  um_per_pixel: 1.0
+  graph_method: knn
+  k_neighbors: 6
+  max_distance_um: 100.0
+  contact_threshold_um: 15.0
+  secreted_threshold_um: 100.0
+  metabolite_threshold_um: 100.0
+  metabolite_flux_quantile: 0.50
+  require_gene_presence: true
+
+cell_gene_edges:
+  top_k_per_cell: 200
+  min_expr_quantile: 0.3

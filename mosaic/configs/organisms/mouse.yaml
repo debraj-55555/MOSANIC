@@ -1,0 +1,17 @@
+# Mouse organism settings
+organism: mouse
+
+paths:
+  lr_database: databases/LR_database_mouse.csv
+  met_database: databases/M_R_mouse.txt
+
+lr_database:
+  source_name: NicheNet_v2_CellTalkDB_mouse
+
+metabolite_database:
+  source_name: scFEA_mouse+MR
+
+scfea:
+  module_gene_file: module_gene_complete_mouse_m168.csv
+  stoichiometry_matrix: cmMat_complete_mouse_c70_m168.csv
+  compound_name_file: cName_complete_mouse_c70_m168.csv

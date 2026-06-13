@@ -1,0 +1,12 @@
+# Human organism settings
+organism: human
+
+paths:
+  lr_database: databases/CellNEST_database.csv
+  met_database: databases/M_R.txt
+
+lr_database:
+  source_name: CellNEST
+
+metabolite_database:
+  source_name: scFEA+MR

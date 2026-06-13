@@ -1,0 +1,23 @@
+# Xenium-specific settings
+technology: xenium
+
+spatial:
+  spot_diameter_um: 15.0
+  um_per_pixel: 1.0
+  graph_method: knn
+  k_neighbors: 10
+  max_distance_um: 50.0
+  contact_threshold_um: 20.0
+  secreted_threshold_um: 50.0
+  metabolite_threshold_um: 50.0
+  metabolite_flux_quantile: 0.50
+  require_gene_presence: true
+
+cell_gene_edges:
+  top_k_per_cell: 400
+  min_expr_quantile: 0.5
+
+model:
+  hidden_dim: 128
+  ffn_ratio: 2.0
+  decoder_dims: [128]

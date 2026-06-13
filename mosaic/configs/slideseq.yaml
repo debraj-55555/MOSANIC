@@ -1,0 +1,14 @@
+# Slide-seqV2-specific settings
+technology: slide_seqv2
+
+spatial:
+  spot_diameter_um: 10.0
+  um_per_pixel: 1.0
+  graph_method: knn
+  k_neighbors: 6
+  max_distance_um: 50.0
+  contact_threshold_um: 15.0
+  secreted_threshold_um: 50.0
+  metabolite_threshold_um: 50.0
+  metabolite_flux_quantile: 0.50
+  require_gene_presence: true

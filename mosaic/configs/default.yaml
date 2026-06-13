@@ -1,0 +1,58 @@
+# MOSAIC Default Configuration
+# Override with technology-specific or dataset-specific configs
+
+# -- Node features (pre-trained, frozen) --
+node_features:
+  cell_dim: 128          # scVI latent
+  gene_dim: 1280         # ESM-2 (esm2_t33_650M_UR50D)
+  metabolite_dim: 600    # ChemBERTa-77M-MTR
+
+# -- Model architecture --
+model:
+  hidden_dim: 256
+  n_heads: 4
+  n_layers: 2
+  dropout: 0.1
+  ffn_ratio: 4.0
+  decoder_dims: [256]
+  decoder_dropout: 0.2
+
+# -- Training --
+training:
+  epochs: 500
+  lr: 0.001
+  weight_decay: 1.0e-4
+  batch_size: null       # full-graph transductive
+  grad_clip: 5.0
+  expr_loss: huber
+  patience: 50
+  scheduler: plateau
+  scheduler_factor: 0.5
+  scheduler_patience: 15
+  lambda_spatial: 0.0
+
+# -- Expression labels --
+labels:
+  n_target_genes: 200
+  n_lr_pairs: null
+
+# -- Cell-gene edges --
+cell_gene_edges:
+  top_k_per_cell: 500
+  min_expr_quantile: 0.5
+
+# -- Metabolite --
+metabolite_database:
+  flux_quantile_edge: 0.50
+  flux_quantile_label: 0.75
+
+# -- LR database --
+lr_database:
+  symmetric_dedup: true
+  technology_filter: false
+
+# -- Evaluation --
+evaluation:
+  des_n_permutations: 1000
+  recall_k_values: [100, 500, 1000]
+  n_clusters: 10
