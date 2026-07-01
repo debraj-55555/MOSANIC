@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-MOSAIC End-to-End Pipeline Test — Breast Cancer (Visium)
+MOSANIC End-to-End Pipeline Test — Breast Cancer (Visium)
 
 Full pipeline from raw data → preprocessing → training → CCC extraction → output.
 Produces biologically meaningful outputs: ranked LR pairs, cell-type communication
@@ -9,7 +9,7 @@ matrices, per-cell spatial communication maps, evaluation metrics.
 This mirrors what CellNEST and other CCC tools produce as user-facing results.
 
 Usage:
-    cd /mnt/disk-drive/debraj/cci_proj2/CCC/MOSAIC
+    cd /mnt/disk-drive/debraj/cci_proj2/CCC/MOSANIC
     /opt/miniconda/envs/ccc_env/bin/python3 tests/test_end_to_end.py --device cuda
 
     Quick test (50 epochs):
@@ -32,7 +32,7 @@ import torch
 import yaml
 
 # ─── Paths ────────────────────────────────────────────────────────────────────
-ROOT = Path(__file__).resolve().parents[1]       # MOSAIC/
+ROOT = Path(__file__).resolve().parents[1]       # MOSANIC/
 PROJECT = ROOT.parent                             # CCC/
 sys.path.insert(0, str(ROOT))
 
@@ -40,7 +40,7 @@ logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s [%(levelname)s] %(message)s",
 )
-log = logging.getLogger("mosaic.e2e")
+log = logging.getLogger("mosanic.e2e")
 
 OUTPUT_DIR = ROOT / "output" / "breast_new"
 
@@ -141,7 +141,7 @@ def phase2_preprocess(config_path):
                 if src_f.exists():
                     shutil.copy2(src_f, processed_dir / fname)
         else:
-            log.error(f"  No graph found. Run: mosaic preprocess --config {config_path}")
+            log.error(f"  No graph found. Run: mosanic preprocess --config {config_path}")
             sys.exit(1)
 
     # Load graph
@@ -170,16 +170,16 @@ def phase2_preprocess(config_path):
 # =============================================================================
 
 def phase3_train(data, metadata, cfg, device, num_epochs):
-    """Train MOSAIC model."""
+    """Train MOSANIC model."""
     banner(f"PHASE 3: Training ({num_epochs} epochs)")
 
-    from mosaic.models import build_model
-    from mosaic.training.trainer import MOSAICTrainer
+    from mosanic.models import build_model
+    from mosanic.training.trainer import MOSANICTrainer
 
     n_expr_genes = data["cell"].y_expr.shape[1]
     model = build_model(cfg=cfg, n_expr_genes=n_expr_genes, graph_metadata=metadata)
     params = model.count_parameters()
-    log.info(f"  MOSAIC model: {params['total']:,} params (encoder={params['encoder']:,}, decoder={params['expression_decoder']:,})")
+    log.info(f"  MOSANIC model: {params['total']:,} params (encoder={params['encoder']:,}, decoder={params['expression_decoder']:,})")
 
     # Override training config
     cfg["training"]["epochs"] = num_epochs
@@ -191,7 +191,7 @@ def phase3_train(data, metadata, cfg, device, num_epochs):
     cfg["training"]["checkpoint_dir"] = str(ROOT / "checkpoints")
 
     data_dev = data.to(device)
-    trainer = MOSAICTrainer(model, data_dev, cfg, device=device, dataset=cfg["dataset"])
+    trainer = MOSANICTrainer(model, data_dev, cfg, device=device, dataset=cfg["dataset"])
 
     t0 = time.time()
     history = trainer.train(num_epochs=num_epochs)
@@ -229,7 +229,7 @@ def phase4_extract_ccc(model, data, device, processed_dir, cfg):
     """Extract all CCC outputs: LR scores, comm matrices, spatial maps."""
     banner("PHASE 4: CCC Extraction")
 
-    from mosaic.evaluation.ccc_extractor import CCCExtractor
+    from mosanic.evaluation.ccc_extractor import CCCExtractor
 
     model.eval()
 
@@ -426,15 +426,15 @@ def phase6_save_outputs(ccc_results, eval_metrics, train_metrics, cfg):
 # =============================================================================
 
 def main():
-    parser = argparse.ArgumentParser(description="MOSAIC End-to-End Pipeline Test")
+    parser = argparse.ArgumentParser(description="MOSANIC End-to-End Pipeline Test")
     parser.add_argument("--device", default="cuda" if torch.cuda.is_available() else "cpu")
     parser.add_argument("--epochs", type=int, default=500, help="Training epochs (default: 500)")
     args = parser.parse_args()
 
     device = torch.device(args.device if torch.cuda.is_available() or args.device == "cpu" else "cpu")
-    config_path = ROOT / "mosaic/configs/examples/breast_cancer_visium.yaml"
+    config_path = ROOT / "mosanic/configs/examples/breast_cancer_visium.yaml"
 
-    banner("MOSAIC END-TO-END PIPELINE")
+    banner("MOSANIC END-TO-END PIPELINE")
     log.info(f"  Config:  {config_path}")
     log.info(f"  Device:  {device}")
     log.info(f"  Epochs:  {args.epochs}")

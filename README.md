@@ -1,32 +1,52 @@
-# MOSAIC
+# MOSANIC
 
 **M**ulti-**O**mic **S**patial **A**ttention for **I**ntercellular **C**ommunication — a heterogeneous graph transformer for cell–cell communication (CCC) inference from spatial transcriptomics.
 
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 [![Python 3.9+](https://img.shields.io/badge/python-3.9+-blue.svg)](https://www.python.org/downloads/)
 
-MOSAIC scores **ligand–receptor (LR)** and **metabolite–receptor (MR)** interactions, identifies **communication hubs**, detects **multi-hop relay chains**, and performs **in-silico knockout** — all as parameter-free read-outs of one trained graph-attention model.
+MOSANIC scores **ligand–receptor (LR)** and **metabolite–receptor (MR)** interactions, identifies **communication hubs**, detects **multi-hop relay chains**, and performs **in-silico knockout** — all as parameter-free read-outs of one trained graph-attention model.
 
 ---
 
 ## Installation
 
 ```bash
-git clone https://github.com/<your-org>/MOSAIC.git
-cd MOSAIC
+git clone https://github.com/<your-org>/MOSANIC.git
+cd MOSANIC
 pip install -e .
 ```
 
-This single command installs MOSAIC together with its **bundled scFEA** flux estimator (no separate setup) and every required dependency (PyTorch, PyTorch-Geometric, scanpy, scVI-tools, ESM-2, ChemBERTa, MAGIC).
+This single command installs MOSANIC together with its **bundled scFEA** flux estimator (no separate setup) and every required dependency (PyTorch, PyTorch-Geometric, scanpy, scVI-tools, ESM-2, ChemBERTa, MAGIC).
 
-**System requirements**: Python 3.9+, CUDA-enabled GPU recommended for training (CPU works for inference / score read-outs).
+**System requirements**: Python 3.9–3.11, CUDA-enabled GPU recommended for training (CPU works for inference / score read-outs).
+
+### PyTorch / GPU compatibility
+
+MOSANIC tracks current PyTorch — it is tested with **PyTorch ≥ 2.2 (including 2.12)** and **PyTorch-Geometric ≥ 2.4**. One install caveat is worth noting:
+
+- **Match the PyTorch CUDA build to your NVIDIA driver.** A plain `pip install` may pull the newest CUDA wheel (e.g. `torch==2.12+cu130`, which needs a CUDA 13 driver). On a host with an older driver (e.g. CUDA 12.x) that wheel silently falls back to **CPU**. To use the GPU, install the matching build first, for example:
+
+  ```bash
+  # CUDA 12.x driver:
+  pip install "torch>=2.2" --index-url https://download.pytorch.org/whl/cu121
+  pip install -e .                      # then install MOSANIC
+  # CPU-only:
+  pip install "torch>=2.2" --index-url https://download.pytorch.org/whl/cpu
+  ```
+
+  Verify with `python -c "import torch; print(torch.cuda.is_available())"`.
+
+- All compute paths accept `device="cpu"` (CLI `--device cpu`) and the pipeline automatically falls back to CPU when no compatible GPU is visible.
+
+> Compatibility note: MOSANIC has been updated for the PyTorch ≥ 2.6 API — it no longer passes the removed `verbose` argument to `ReduceLROnPlateau` and loads its own trusted checkpoints/graphs with `weights_only=False`. Transient `GradScaler`/`autocast` deprecation warnings from newer PyTorch are harmless.
 
 ---
 
 ## Quick start
 
 ```python
-from mosaic import run_pipeline
+from mosanic import run_pipeline
 
 # One call: preprocess → train → score → return analysis object
 result = run_pipeline(
@@ -66,10 +86,10 @@ For an end-to-end walkthrough covering all 11 application sections — niches, L
 
 ## Configurations — pick technology + organism, not per-dataset
 
-MOSAIC ships with composable YAML configs in [`mosaic/configs/`](mosaic/configs/). The base [`default.yaml`](mosaic/configs/default.yaml) carries model + training defaults; per-technology and per-organism overrides are layered on top:
+MOSANIC ships with composable YAML configs in [`mosanic/configs/`](mosanic/configs/). The base [`default.yaml`](mosanic/configs/default.yaml) carries model + training defaults; per-technology and per-organism overrides are layered on top:
 
 ```
-mosaic/configs/
+mosanic/configs/
 ├── default.yaml              # Base model + training (shared)
 ├── visium.yaml               # 10x Visium spatial parameters
 ├── xenium.yaml               # 10x Xenium spatial parameters
@@ -80,13 +100,13 @@ mosaic/configs/
     └── mouse.yaml            # Mouse LR + MR databases
 ```
 
-You **do not** need a per-dataset config file. Calling `mosaic.run_pipeline(..., technology="visium", organism="human")` automatically composes `default + visium + organisms/human`. If you need to override anything (e.g., `epochs`, `lr`, `k_neighbors`), pass it as a keyword to `run_pipeline()` or use `mosaic.setup()` to write a final composed config to disk before training.
+You **do not** need a per-dataset config file. Calling `mosanic.run_pipeline(..., technology="visium", organism="human")` automatically composes `default + visium + organisms/human`. If you need to override anything (e.g., `epochs`, `lr`, `k_neighbors`), pass it as a keyword to `run_pipeline()` or use `mosanic.setup()` to write a final composed config to disk before training.
 
 ---
 
 ## Architecture overview
 
-MOSAIC represents a tissue as a **heterogeneous graph** with three node types (cells, genes, metabolites) and **seven biologically-typed edges**:
+MOSANIC represents a tissue as a **heterogeneous graph** with three node types (cells, genes, metabolites) and **seven biologically-typed edges**:
 
 **Cell–cell τ edges** (bidirectional, seeded from spatial k-NN):
 - **τ₁** *secreted* — paracrine LR signalling within d_sec µm
@@ -130,13 +150,13 @@ The included [`tutorial.ipynb`](tutorial.ipynb) walks through:
 
 ## Reproducing the paper
 
-All five datasets, trained checkpoints, evaluation results, supplementary materials and analysis notebooks are deposited at **Zenodo: [DOI: 10.5281/zenodo.XXXXXXX](https://doi.org/10.5281/zenodo.XXXXXXX)** (deposit pending; corresponds to the MOSAIC paper submission, 2026).
+All five datasets, trained checkpoints, evaluation results, supplementary materials and analysis notebooks are deposited at **Zenodo: [DOI: 10.5281/zenodo.XXXXXXX](https://doi.org/10.5281/zenodo.XXXXXXX)** (deposit pending; corresponds to the MOSANIC paper submission, 2026).
 
 End-to-end retraining + evaluation for a single dataset:
 ```bash
-mosaic preprocess --config tissue_config.yaml
-mosaic train      --config tissue_config.yaml
-mosaic evaluate   --config tissue_config.yaml
+mosanic preprocess --config tissue_config.yaml
+mosanic train      --config tissue_config.yaml
+mosanic evaluate   --config tissue_config.yaml
 ```
 
 ---
@@ -146,21 +166,21 @@ mosaic evaluate   --config tissue_config.yaml
 By default the package logs at `WARNING` level — minimal output. Increase verbosity with:
 
 ```python
-import mosaic
-mosaic.set_verbosity("info")     # major lifecycle messages
-mosaic.set_verbosity("debug")    # full per-step trace
-mosaic.set_verbosity("silent")   # suppress everything
+import mosanic
+mosanic.set_verbosity("info")     # major lifecycle messages
+mosanic.set_verbosity("debug")    # full per-step trace
+mosanic.set_verbosity("silent")   # suppress everything
 ```
 
 ---
 
 ## Citation
 
-If you use MOSAIC in your research, please cite:
+If you use MOSANIC in your research, please cite:
 
 ```bibtex
-@article{mosaic2026,
-  title   = {MOSAIC: Multi-Omic Spatial Attention for Intercellular Communication},
+@article{mosanic2026,
+  title   = {MOSANIC: Multi-mOdal Self-Attention Network for Intercellular Communication},
   author  = {<author list>},
   journal = {<journal pending>},
   year    = {2026},

@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
 """
-MOSAIC Full Pipeline Test — Breast Cancer (Visium)
+MOSANIC Full Pipeline Test — Breast Cancer (Visium)
 
 Tests the complete pipeline: preprocess → train → evaluate
 using real breast cancer spatial transcriptomics data.
 
 Usage:
-    cd /mnt/disk-drive/debraj/cci_proj2/CCC/MOSAIC
+    cd /mnt/disk-drive/debraj/cci_proj2/CCC/MOSANIC
     /opt/miniconda/envs/ccc_env/bin/python3 tests/test_full_pipeline.py [--device cuda] [--quick]
 
 Options:
@@ -26,7 +26,7 @@ import torch
 import yaml
 
 # ─── Setup ────────────────────────────────────────────────────────────────────
-ROOT = Path(__file__).resolve().parents[1]       # MOSAIC/
+ROOT = Path(__file__).resolve().parents[1]       # MOSANIC/
 PROJECT = ROOT.parent                             # CCC/
 sys.path.insert(0, str(ROOT))
 
@@ -34,7 +34,7 @@ logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s [%(levelname)s] %(message)s",
 )
-log = logging.getLogger("mosaic.test")
+log = logging.getLogger("mosanic.test")
 
 
 def banner(msg):
@@ -69,19 +69,19 @@ def check_data_exists():
 
 
 def test_imports():
-    """Test that all MOSAIC modules import correctly."""
+    """Test that all MOSANIC modules import correctly."""
     banner("TEST 1: Module Imports")
 
-    from mosaic import __version__, MOSAIC, build_model
-    log.info(f"  mosaic v{__version__}")
+    from mosanic import __version__, MOSANIC, build_model
+    log.info(f"  mosanic v{__version__}")
 
-    from mosaic.models.encoder import HetGTEncoder
-    from mosaic.models.decoder import ExpressionDecoder
-    from mosaic.training.trainer import MOSAICTrainer
-    from mosaic.training.losses import MOSAICLoss
-    from mosaic.training.callbacks import EarlyStopping, ModelCheckpoint
-    from mosaic.graph import GraphAssembler, EdgeBuilder, NodeFeatureBuilder
-    from mosaic.evaluation.ccc_extractor import CCCExtractor
+    from mosanic.models.encoder import HetGTEncoder
+    from mosanic.models.decoder import ExpressionDecoder
+    from mosanic.training.trainer import MOSANICTrainer
+    from mosanic.training.losses import MOSANICLoss
+    from mosanic.training.callbacks import EarlyStopping, ModelCheckpoint
+    from mosanic.graph import GraphAssembler, EdgeBuilder, NodeFeatureBuilder
+    from mosanic.evaluation.ccc_extractor import CCCExtractor
     log.info("  ✓ All modules imported successfully")
 
 
@@ -89,7 +89,7 @@ def test_model_forward():
     """Test model construction and forward pass with dummy data."""
     banner("TEST 2: Model Forward Pass (Dummy Data)")
 
-    from mosaic.models import build_model
+    from mosanic.models import build_model
     from torch_geometric.data import HeteroData
 
     model = build_model(
@@ -125,8 +125,8 @@ def test_model_forward():
     log.info(f"  ✓ Forward pass: expr={result['expression'].shape}, attn_layers=1")
 
     # Test loss
-    from mosaic.training.losses import MOSAICLoss
-    loss_fn = MOSAICLoss(ccc_weight=0.0, expr_loss_type="huber")
+    from mosanic.training.losses import MOSANICLoss
+    loss_fn = MOSANICLoss(ccc_weight=0.0, expr_loss_type="huber")
     loss, _ = loss_fn(
         result, {"expression": torch.randn(10, 50)},
         node_mask=torch.ones(10, dtype=torch.bool),
@@ -171,7 +171,7 @@ def test_preprocess(config_path, skip=False):
         log.info(f"  ✓ Processed graph copied to: {processed_dir}")
     else:
         log.error(f"  No existing graph found at {src5_graph}")
-        log.error("  Run: mosaic preprocess --config <config> first")
+        log.error("  Run: mosanic preprocess --config <config> first")
         sys.exit(1)
 
 
@@ -179,8 +179,8 @@ def test_train(config_path, device, quick=False):
     """Train on breast cancer data."""
     banner("TEST 4: Training (Real Breast Data)")
 
-    from mosaic.models import build_model
-    from mosaic.training.trainer import MOSAICTrainer
+    from mosanic.models import build_model
+    from mosanic.training.trainer import MOSANICTrainer
 
     with open(config_path) as f:
         cfg = yaml.safe_load(f)
@@ -222,7 +222,7 @@ def test_train(config_path, device, quick=False):
 
     # Train
     data_dev = data.to(device)
-    trainer = MOSAICTrainer(model, data_dev, cfg, device=device, dataset=dataset)
+    trainer = MOSANICTrainer(model, data_dev, cfg, device=device, dataset=dataset)
 
     t0 = time.time()
     num_epochs = cfg["training"].get("epochs", 500)
@@ -246,7 +246,7 @@ def test_evaluate(model, data, device):
     """Extract CCC scores and compute metrics."""
     banner("TEST 5: CCC Evaluation")
 
-    from mosaic.evaluation.ccc_extractor import CCCExtractor
+    from mosanic.evaluation.ccc_extractor import CCCExtractor
 
     model.eval()
     extractor = CCCExtractor(model, data, device=device)
@@ -284,16 +284,16 @@ def test_evaluate(model, data, device):
 
 
 def main():
-    parser = argparse.ArgumentParser(description="MOSAIC Full Pipeline Test")
+    parser = argparse.ArgumentParser(description="MOSANIC Full Pipeline Test")
     parser.add_argument("--device", default="cuda" if torch.cuda.is_available() else "cpu")
     parser.add_argument("--quick", action="store_true", help="Quick test (10 epochs)")
     parser.add_argument("--skip-preprocess", action="store_true", help="Skip preprocessing")
     args = parser.parse_args()
 
     device = torch.device(args.device if torch.cuda.is_available() or args.device == "cpu" else "cpu")
-    config_path = ROOT / "mosaic/configs/examples/breast_cancer_visium.yaml"
+    config_path = ROOT / "mosanic/configs/examples/breast_cancer_visium.yaml"
 
-    banner("MOSAIC FULL PIPELINE TEST")
+    banner("MOSANIC FULL PIPELINE TEST")
     log.info(f"  Config:  {config_path}")
     log.info(f"  Device:  {device}")
     log.info(f"  Mode:    {'quick (10 epochs)' if args.quick else 'full (500 epochs)'}")
@@ -324,7 +324,7 @@ def main():
     elapsed = time.time() - t_start
     banner("ALL TESTS PASSED")
     log.info(f"  Total time: {elapsed:.1f}s")
-    log.info(f"  Package:    mosaic-ccc v1.0.0")
+    log.info(f"  Package:    mosanic-ccc v1.0.0")
     log.info(f"  Dataset:    breast_new (Visium)")
     log.info(f"  Device:     {device}")
     log.info("")

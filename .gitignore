@@ -28,9 +28,9 @@ env/
 .DS_Store
 Thumbs.db
 
-# MOSAIC runtime artifacts (regenerated; never committed)
-mosaic_tutorial/
-mosaic_output/
+# MOSANIC runtime artifacts (regenerated; never committed)
+mosanic_tutorial/
+mosanic_output/
 output/
 logs/
 checkpoints/

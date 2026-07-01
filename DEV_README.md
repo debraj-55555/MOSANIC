@@ -1,6 +1,6 @@
-# MOSAIC Developer Guide
+# MOSANIC Developer Guide
 
-> **MOSAIC**: Multi-mOdal Spatial Attention for Intercellular Communication
+> **MOSANIC**: Multi-mOdal Self-Attention Network for Intercellular Communication
 >
 > Internal reference for extending, debugging, and maintaining the package.
 
@@ -9,15 +9,15 @@
 ## Package Structure
 
 ```
-MOSAIC/
-├── mosaic/                         # Main Python package
-│   ├── __init__.py                 # v1.0.0, exports MOSAIC class + build_model
-│   ├── cli.py                      # Entry point: mosaic preprocess|train|evaluate|run
+MOSANIC/
+├── mosanic/                         # Main Python package
+│   ├── __init__.py                 # v1.0.0, exports MOSANIC class + build_model
+│   ├── cli.py                      # Entry point: mosanic preprocess|train|evaluate|run
 │   │
 │   ├── models/                     # Neural network architecture
 │   │   ├── encoder.py              # HetGTEncoder — heterogeneous graph transformer
 │   │   ├── decoder.py              # ExpressionDecoder — MLP for gene expression
-│   │   └── mosaic_model.py         # MOSAIC class (encoder + decoder) + build_model()
+│   │   └── mosanic_model.py         # MOSANIC class (encoder + decoder) + build_model()
 │   │
 │   ├── data/                       # Data loading & preprocessing
 │   │   ├── preprocessor.py         # 17-step pipeline (THE main preprocessing script)
@@ -37,8 +37,8 @@ MOSAIC/
 │   │   └── intracellular_edge_builder.py  # τ₃ self-loop edges (receptor PCA + flux)
 │   │
 │   ├── training/                   # Model training
-│   │   ├── trainer.py              # MOSAICTrainer — full training loop
-│   │   ├── losses.py               # MOSAICLoss — Huber + optional CCC auxiliary
+│   │   ├── trainer.py              # MOSANICTrainer — full training loop
+│   │   ├── losses.py               # MOSANICLoss — Huber + optional CCC auxiliary
 │   │   └── callbacks.py            # EarlyStopping, ModelCheckpoint, TensorBoard
 │   │
 │   ├── evaluation/                 # Model evaluation & CCC scoring
@@ -75,7 +75,7 @@ MOSAIC/
 │
 ├── checkpoints/                    # Trained model weights (created by training)
 ├── data/processed/                 # Preprocessed graphs (created by preprocessing)
-├── run_mosaic.py                   # Top-level runner script
+├── run_mosanic.py                   # Top-level runner script
 ├── setup.py                        # pip install -e .
 ├── pyproject.toml                  # Package metadata
 └── DEV_README.md                   # THIS FILE
@@ -87,7 +87,7 @@ MOSAIC/
 
 ### Input h5ad format
 
-MOSAIC expects an AnnData `.h5ad` file with:
+MOSANIC expects an AnnData `.h5ad` file with:
 
 | Slot | Shape | Description | Required? |
 |------|-------|-------------|-----------|
@@ -148,14 +148,14 @@ scfea_balance_<dataset>.csv
 All paths in the config are resolved relative to `Path(root).parent`:
 
 ```
-root: MOSAIC                        # → /path/to/CCC/MOSAIC
+root: MOSANIC                        # → /path/to/CCC/MOSANIC
 root.parent: /path/to/CCC           # base for path resolution
 raw_adata: src5/data/raw/x.h5ad    # → /path/to/CCC/src5/data/raw/x.h5ad
 ```
 
 ### Creating a config for a new dataset
 
-1. Copy `mosaic/configs/examples/breast_cancer_visium.yaml`
+1. Copy `mosanic/configs/examples/breast_cancer_visium.yaml`
 2. Update `dataset`, `technology`, `organism`
 3. Update all paths under `paths:`
 4. Adjust spatial thresholds if needed (or inherit from technology configs)
@@ -174,12 +174,12 @@ raw_adata: src5/data/raw/x.h5ad    # → /path/to/CCC/src5/data/raw/x.h5ad
 
 ## Architecture Reference
 
-### Model: MOSAIC (mosaic/models/mosaic_model.py)
+### Model: MOSANIC (mosanic/models/mosanic_model.py)
 
 ```
 HeteroData (3 node types, 7 edge types)
         ↓
-    HetGTEncoder                          # mosaic/models/encoder.py
+    HetGTEncoder                          # mosanic/models/encoder.py
     ├── Input projections (per node type)
     │   cell:       Linear(128→256) + LN + GELU
     │   gene:       Linear(1280→256) + LN + GELU
@@ -191,7 +191,7 @@ HeteroData (3 node types, 7 edge types)
     │   └── FFN(256→1024→256) + Residual + LayerNorm
     └── Output: cell_embeddings [N, 256]
         ↓
-    ExpressionDecoder                     # mosaic/models/decoder.py
+    ExpressionDecoder                     # mosanic/models/decoder.py
     └── MLP: 256 → 256 → 200 genes
         ↓
     expression [N, 200]  ← Huber loss vs observed log1p expression
@@ -228,19 +228,19 @@ I_cell(L, R) = s(L, R) × max(expr_L, 0) × max(expr_R, 0)
 
 ### Adding a new edge type
 
-1. **Define builder** in `mosaic/graph/edge_builder.py`:
+1. **Define builder** in `mosanic/graph/edge_builder.py`:
    ```python
    def _step_new_edge(self, ...):
        # Return (edge_index [2, E], edge_attr [E, d])
    ```
 
-2. **Register in assembler** (`mosaic/graph/assembler.py`):
+2. **Register in assembler** (`mosanic/graph/assembler.py`):
    ```python
    data["src_type", "relation", "dst_type"].edge_index = new_ei
    data["src_type", "relation", "dst_type"].edge_attr = new_ea
    ```
 
-3. **Add edge_dim to encoder defaults** (`mosaic/models/encoder.py`):
+3. **Add edge_dim to encoder defaults** (`mosanic/models/encoder.py`):
    ```python
    DEFAULT_EDGE_TYPE_DIMS[("src", "relation", "dst")] = attr_dim
    ```
@@ -256,26 +256,26 @@ I_cell(L, R) = s(L, R) × max(expr_L, 0) × max(expr_R, 0)
 
 ### Adding a new evaluation metric
 
-1. Add function to `mosaic/evaluation/metrics.py`
-2. Call it from `mosaic/evaluation/evaluator.py`
+1. Add function to `mosanic/evaluation/metrics.py`
+2. Call it from `mosanic/evaluation/evaluator.py`
 3. Store result in `ccc_eval_results.json`
 
 ### Adding a new downstream analysis
 
-1. Create `mosaic/analysis/new_analysis.py`
-2. Export from `mosaic/analysis/__init__.py`
-3. Optionally add a CLI subcommand in `mosaic/cli.py`
+1. Create `mosanic/analysis/new_analysis.py`
+2. Export from `mosanic/analysis/__init__.py`
+3. Optionally add a CLI subcommand in `mosanic/cli.py`
 
 ### Adding a new technology
 
-1. Create `mosaic/configs/new_tech.yaml` with spatial parameters
-2. Add detection logic in `mosaic/data/technology.py`
+1. Create `mosanic/configs/new_tech.yaml` with spatial parameters
+2. Add detection logic in `mosanic/data/technology.py`
 3. Add distance threshold defaults
 
 ### Adding a new organism
 
-1. Create `mosaic/configs/organisms/new_org.yaml`
-2. Add LR database to `mosaic/databases/`
+1. Create `mosanic/configs/organisms/new_org.yaml`
+2. Add LR database to `mosanic/databases/`
 3. Add metabolite database if available
 
 ---
@@ -284,21 +284,21 @@ I_cell(L, R) = s(L, R) × max(expr_L, 0) × max(expr_R, 0)
 
 | What you want to do | File to edit |
 |---------------------|-------------|
-| Change model architecture | `mosaic/models/encoder.py` |
-| Change loss function | `mosaic/training/losses.py` |
-| Change training loop | `mosaic/training/trainer.py` |
-| Change graph construction | `mosaic/graph/edge_builder.py` |
-| Add preprocessing step | `mosaic/data/preprocessor.py` |
-| Change CCC scoring | `mosaic/evaluation/ccc_extractor.py` |
-| Add evaluation metric | `mosaic/evaluation/metrics.py` |
-| Add CLI command | `mosaic/cli.py` |
-| Add database | `mosaic/databases/` + organism config |
+| Change model architecture | `mosanic/models/encoder.py` |
+| Change loss function | `mosanic/training/losses.py` |
+| Change training loop | `mosanic/training/trainer.py` |
+| Change graph construction | `mosanic/graph/edge_builder.py` |
+| Add preprocessing step | `mosanic/data/preprocessor.py` |
+| Change CCC scoring | `mosanic/evaluation/ccc_extractor.py` |
+| Add evaluation metric | `mosanic/evaluation/metrics.py` |
+| Add CLI command | `mosanic/cli.py` |
+| Add database | `mosanic/databases/` + organism config |
 
 ---
 
 ## Output Files (What a Biologist Gets)
 
-After running the full pipeline, MOSAIC produces these user-facing outputs:
+After running the full pipeline, MOSANIC produces these user-facing outputs:
 
 ```
 output/<dataset>/
@@ -309,7 +309,7 @@ output/<dataset>/
 ├── comm_matrix_metabolite.csv        # Cell-type × cell-type communication (metabolite channel)
 ├── comm_matrix_intracellular.csv     # Cell-type × cell-type communication (intracellular)
 ├── cell_embeddings.npy               # [N, 256] for UMAP/clustering
-├── mosaic_results.json               # Summary: AUROC, ARI, NMI, training metrics
+├── mosanic_results.json               # Summary: AUROC, ARI, NMI, training metrics
 └── spatial_communication_intensity.csv  # Per-cell LR intensity for spatial visualization
 ```
 
@@ -339,7 +339,7 @@ Training: 376 epochs, 145s on A100
 
 ### End-to-end pipeline test (500 epochs, ~2.5 min)
 ```bash
-cd MOSAIC
+cd MOSANIC
 python tests/test_end_to_end.py --device cuda --epochs 500
 ```
 
@@ -350,21 +350,21 @@ python tests/test_full_pipeline.py --quick --device cuda
 
 ### Import-only test
 ```bash
-python -c "from mosaic import MOSAIC, build_model; print('OK')"
+python -c "from mosanic import MOSANIC, build_model; print('OK')"
 ```
 
 ---
 
-## Naming Map (src5 → MOSAIC)
+## Naming Map (src5 → MOSANIC)
 
-| src5 name | MOSAIC name | File |
+| src5 name | MOSANIC name | File |
 |-----------|-------------|------|
-| `HetGT5CCC` | `MOSAIC` | `models/mosaic_model.py` |
+| `HetGT5CCC` | `MOSANIC` | `models/mosanic_model.py` |
 | `MultiTypeHetGTEncoder` | `HetGTEncoder` | `models/encoder.py` |
 | `MultiTypeHetGTBlock` | `HetGTBlock` | `models/encoder.py` |
 | `ExpressionDecoder` | `ExpressionDecoder` | `models/decoder.py` (unchanged) |
-| `HetGT5Trainer` | `MOSAICTrainer` | `training/trainer.py` |
-| `HetGTCCCLoss` | `MOSAICLoss` | `training/losses.py` |
+| `HetGT5Trainer` | `MOSANICTrainer` | `training/trainer.py` |
+| `HetGTCCCLoss` | `MOSANICLoss` | `training/losses.py` |
 | `HeteroGraphAssembler` | `GraphAssembler` | `graph/assembler.py` |
 | `CCCExtractor` | `CCCExtractor` | `evaluation/ccc_extractor.py` (unchanged) |
 | `preprocess.py` | `data/preprocessor.py` | — |
@@ -385,6 +385,6 @@ Core:
 
 Optional:
 - tensorboard (for training visualization)
-- scFEA (bundled in mosaic/external/scfea/)
+- scFEA (bundled in mosanic/external/scfea/)
 
-Install: `pip install -e .` from the MOSAIC/ directory.
+Install: `pip install -e .` from the MOSANIC/ directory.

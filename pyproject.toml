@@ -3,13 +3,13 @@ requires = ["setuptools>=64", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "mosaic-ccc"
+name = "mosanic-ccc"
 version = "1.0.0"
-description = "MOSAIC: Multi-Omic Spatial Attention for Intercellular Communication"
+description = "MOSANIC: Multi-mOdal Self-Attention Network for Intercellular Communication"
 readme = "README.md"
 requires-python = ">=3.9"
 license = {text = "MIT"}
-authors = [{name = "MOSAIC Team"}]
+authors = [{name = "MOSANIC Team"}]
 keywords = [
     "spatial transcriptomics", "cell-cell communication", "graph transformer",
     "single cell", "multi-omics", "ligand-receptor", "metabolite-receptor",
@@ -40,7 +40,7 @@ dependencies = [
     # Foundation-model embedders
     "fair-esm>=2.0",        # ESM-2 protein embeddings
     "transformers>=4.30",   # ChemBERTa metabolite embeddings
-    # Bundled scFEA flux estimator dependencies (mosaic/external/scfea/)
+    # Bundled scFEA flux estimator dependencies (mosanic/external/scfea/)
     "magic-impute>=3.0",
     "tqdm>=4.60",
     # Configuration + plotting
@@ -53,20 +53,20 @@ dependencies = [
 dev = ["pytest", "pytest-cov", "black", "ruff", "mypy"]
 
 [project.scripts]
-mosaic = "mosaic.cli:main"
+mosanic = "mosanic.cli:main"
 
 [project.urls]
-Homepage      = "https://github.com/<your-org>/MOSAIC"
-Documentation = "https://github.com/<your-org>/MOSAIC#readme"
-Repository    = "https://github.com/<your-org>/MOSAIC"
-"Bug Tracker" = "https://github.com/<your-org>/MOSAIC/issues"
+Homepage      = "https://github.com/<your-org>/MOSANIC"
+Documentation = "https://github.com/<your-org>/MOSANIC#readme"
+Repository    = "https://github.com/<your-org>/MOSANIC"
+"Bug Tracker" = "https://github.com/<your-org>/MOSANIC/issues"
 
 [tool.setuptools.packages.find]
 where   = ["."]
-include = ["mosaic*"]
+include = ["mosanic*"]
 
 [tool.setuptools.package-data]
-mosaic = [
+mosanic = [
     "configs/*.yaml",
     "configs/*/*.yaml",
     "external/scfea/data/**/*",
