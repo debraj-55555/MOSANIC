@@ -12,7 +12,7 @@ MOSANIC scores **ligand–receptor (LR)** and **metabolite–receptor (MR)** int
 ## Installation
 
 ```bash
-git clone https://github.com/<your-org>/MOSANIC.git
+git clone https://github.com/debraj-55555/MOSANIC
 cd MOSANIC
 pip install -e .
 ```
@@ -56,22 +56,22 @@ result = run_pipeline(
     epochs=500,
 )
 
-# Ligand-receptor pairs ranked by intensity-weighted attention (paper Fig 2)
+# Ligand-receptor pairs ranked by intensity-weighted attention 
 result.lr_pairs(top_k=20)
 
 # Spatial activity of a specific LR pair
 result.plot_spatial("TGFB1", "TGFBR2")
 
-# Cell-type × cell-type communication matrix (paper Fig 3)
+# Cell-type × cell-type communication matrix 
 result.communication_matrix(channel="secreted")
 
-# In-silico knockout of a candidate hub (paper Fig 6)
+# In-silico knockout of a candidate hub 
 result.knockout_gene("SCARF1")
 
-# Hub-score — paper's central scalar (Methods §4, Eq. 18)
+# Hub-score — paper's central scalar 
 result.hub_scores(top_k=30)                       # canonical: ε₂ + ε₄
-result.hub_scores(top_k=30, channels="lr")        # LR-network hub (Fig 6a/b)
-result.hub_scores(top_k=30, channels="mr")        # MR hub (Fig 4c/d)
+result.hub_scores(top_k=30, channels="lr")        # LR-network hub 
+result.hub_scores(top_k=30, channels="mr")        # MR hub 
 
 # Hub fan-out: SCARF1-style multiplexer (paper Fig 6h)
 result.hub_fanout("SCARF1", top_k=12)
@@ -126,7 +126,7 @@ Node features come from frozen foundation models:
 
 A two-block heterogeneous graph transformer trained on the single objective of held-out spatial-expression prediction yields attention scores from which every downstream analysis is read off **without additional parameters**.
 
-See [`DEV_README.md`](DEV_README.md) for the full module-by-module reference.
+
 
 ---
 
@@ -150,7 +150,7 @@ The included [`tutorial.ipynb`](tutorial.ipynb) walks through:
 
 ## Reproducing the paper
 
-All five datasets, trained checkpoints, evaluation results, supplementary materials and analysis notebooks are deposited at **Zenodo: [DOI: 10.5281/zenodo.XXXXXXX](https://doi.org/10.5281/zenodo.XXXXXXX)** (deposit pending; corresponds to the MOSANIC paper submission, 2026).
+All five datasets, trained checkpoints, evaluation results, supplementary materials and analysis notebooks will be deposited at **Zenodo** (deposit pending; corresponds to the MOSANIC paper submission, 2026).
 
 End-to-end retraining + evaluation for a single dataset:
 ```bash
@@ -174,7 +174,7 @@ mosanic.set_verbosity("silent")   # suppress everything
 
 ---
 
-## Citation
+<!-- ## Citation
 
 If you use MOSANIC in your research, please cite:
 
@@ -186,7 +186,7 @@ If you use MOSANIC in your research, please cite:
   year    = {2026},
   doi     = {10.5281/zenodo.XXXXXXX}
 }
-```
+``` -->
 
 The trained checkpoints, processed datasets, and evaluation outputs are archived at the Zenodo DOI above.
 
@@ -196,4 +196,3 @@ The trained checkpoints, processed datasets, and evaluation outputs are archived
 
 MIT — see [`LICENSE`](LICENSE). Pre-trained model weights inherit the same MIT licence.
 
-The bundled training-time LR catalogues retain their original licences: CellNEST (MIT), NicheNet (Apache-2.0), CellTalkDB (CC-BY-4.0), MEBOCOST (CC-BY-4.0).
