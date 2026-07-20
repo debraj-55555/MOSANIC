@@ -1,11 +1,15 @@
 # MOSANIC
 
-**M**ulti-m**O**dal **S**elf-**A**ttention **N**etwork for **I**ntercellular **C**ommunication — a heterogeneous graph transformer for cell–cell communication (CCC) inference from spatial transcriptomics.
+**Learning the spatial cell-cell communication network to decode multi-channel signalling and predict network-hub vulnerabilities with MOSANIC**
 
+Debraj Das and Pralay Mitra, Indian Institute of Technology Kharagpur.
+
+MOSANIC (Multi-mOdal Self-Attention Network for Intercellular Communication) is a heterogeneous graph transformer for cell-cell communication (CCC) inference from spatial transcriptomics. It represents a tissue as a single typed graph of cells, genes and metabolites, and is trained on the single objective of predicting held-out spatial gene expression. From the learned attention it reads ligand-receptor and metabolite-receptor communication, communication hubs, multi-hop relay chains and in-silico knockouts as parameter-free read-outs, with no per-task supervision.
+
+[![bioRxiv](https://img.shields.io/badge/bioRxiv-2026.07.05.736582-b31b1b.svg)](https://doi.org/10.64898/2026.07.05.736582)
+[![Zenodo](https://img.shields.io/badge/Zenodo-zenodo.21412186-blue.svg)](https://doi.org/10.5281/zenodo.21412186)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 [![Python 3.9+](https://img.shields.io/badge/python-3.9+-blue.svg)](https://www.python.org/downloads/)
-
-MOSANIC scores **ligand–receptor (LR)** and **metabolite–receptor (MR)** interactions, identifies **communication hubs**, detects **multi-hop relay chains**, and performs **in-silico knockout** — all as parameter-free read-outs of one trained graph-attention model.
 
 ---
 
@@ -23,7 +27,7 @@ This single command installs MOSANIC together with its **bundled scFEA** flux es
 
 ### PyTorch / GPU compatibility
 
-MOSANIC tracks current PyTorch — it is tested with **PyTorch ≥ 2.2 (including 2.12)** and **PyTorch-Geometric ≥ 2.4**. One install caveat is worth noting:
+MOSANIC tracks current PyTorch and is tested with **PyTorch ≥ 2.2 (including 2.12)** and **PyTorch-Geometric ≥ 2.4**. One install caveat is worth noting:
 
 - **Match the PyTorch CUDA build to your NVIDIA driver.** A plain `pip install` may pull the newest CUDA wheel (e.g. `torch==2.12+cu130`, which needs a CUDA 13 driver). On a host with an older driver (e.g. CUDA 12.x) that wheel silently falls back to **CPU**. To use the GPU, install the matching build first, for example:
 
@@ -39,7 +43,7 @@ MOSANIC tracks current PyTorch — it is tested with **PyTorch ≥ 2.2 (includin
 
 - All compute paths accept `device="cpu"` (CLI `--device cpu`) and the pipeline automatically falls back to CPU when no compatible GPU is visible.
 
-> Compatibility note: MOSANIC has been updated for the PyTorch ≥ 2.6 API — it no longer passes the removed `verbose` argument to `ReduceLROnPlateau` and loads its own trusted checkpoints/graphs with `weights_only=False`. Transient `GradScaler`/`autocast` deprecation warnings from newer PyTorch are harmless.
+> Compatibility note: MOSANIC has been updated for the PyTorch ≥ 2.6 API and no longer passes the removed `verbose` argument to `ReduceLROnPlateau` and loads its own trusted checkpoints/graphs with `weights_only=False`. Transient `GradScaler`/`autocast` deprecation warnings from newer PyTorch are harmless.
 
 ---
 
@@ -68,7 +72,7 @@ result.communication_matrix(channel="secreted")
 # In-silico knockout of a candidate hub 
 result.knockout_gene("SCARF1")
 
-# Hub-score — paper's central scalar 
+# Hub-score, paper's central scalar 
 result.hub_scores(top_k=30)                       # canonical: ε₂ + ε₄
 result.hub_scores(top_k=30, channels="lr")        # LR-network hub 
 result.hub_scores(top_k=30, channels="mr")        # MR hub 
@@ -80,11 +84,11 @@ result.hub_fanout("SCARF1", top_k=12)
 result.evaluate_against("OmniPath_ligrec.csv")
 ```
 
-For an end-to-end walkthrough covering all 11 application sections — niches, LR/MR ranking, spatial maps, hub-score, knockout, relay detection, multiplexer fan-out — see [`tutorial.ipynb`](tutorial.ipynb).
+For an end-to-end walkthrough covering all 11 application sections: niches, LR/MR ranking, spatial maps, hub-score, knockout, relay detection, multiplexer fan-out; see [`tutorial.ipynb`](tutorial.ipynb).
 
 ---
 
-## Configurations — pick technology + organism, not per-dataset
+## Configurations, pick technology + organism, not per-dataset
 
 MOSANIC ships with composable YAML configs in [`mosanic/configs/`](mosanic/configs/). The base [`default.yaml`](mosanic/configs/default.yaml) carries model + training defaults; per-technology and per-organism overrides are layered on top:
 
@@ -109,15 +113,15 @@ You **do not** need a per-dataset config file. Calling `mosanic.run_pipeline(...
 MOSANIC represents a tissue as a **heterogeneous graph** with three node types (cells, genes, metabolites) and **seven biologically-typed edges**:
 
 **Cell–cell τ edges** (bidirectional, seeded from spatial k-NN):
-- **τ₁** *secreted* — paracrine LR signalling within d_sec µm
-- **τ₂** *metabolite-mediated* — scFEA flux-coupled cells within d_met µm
-- **τ₃** *intracellular* — per-cell self-loop carrying receptor PCA + flux state
+- **τ₁** *secreted*: paracrine LR signalling within d_sec µm
+- **τ₂** *metabolite-mediated*: scFEA flux-coupled cells within d_met µm
+- **τ₃** *intracellular*: per-cell self-loop carrying receptor PCA + flux state
 
 **Cross-type ε edges** (directed):
-- **ε₁** *cell → gene* — top-K expression
-- **ε₂** *gene → gene LR* — canonical ligand–receptor pairs (CellNEST human / NicheNet + CellTalkDB mouse)
-- **ε₃** *cell → metabolite* — scFEA flux
-- **ε₄** *metabolite → receptor* — MEBOCOST sensing edges
+- **ε₁** *cell → gene*: top-K expression
+- **ε₂** *gene → gene LR*: canonical ligand–receptor pairs (CellNEST human / NicheNet + CellTalkDB mouse)
+- **ε₃** *cell → metabolite*: scFEA flux
+- **ε₄** *metabolite → receptor*: MEBOCOST sensing edges
 
 Node features come from frozen foundation models:
 - **scVI** 128-d cell embeddings (auto-trained on first run)
@@ -140,7 +144,7 @@ The included [`tutorial.ipynb`](tutorial.ipynb) walks through:
 4. Spatial communication maps (LR + MR)
 5. Cell-type × cell-type communication matrices
 6. Niche clustering from learned cell embeddings
-7. **Hub-score — canonical + channel-restricted variants** (paper §4)
+7. **Hub-score, canonical + channel-restricted variants** (paper §4)
 8. *In-silico* gene knockout + channel importance
 9. Relay-chain detection (2-hop + cross-channel)
 10. Hub fan-out / multiplexer trace (SCARF1-style)
@@ -150,7 +154,7 @@ The included [`tutorial.ipynb`](tutorial.ipynb) walks through:
 
 ## Reproducing the paper
 
-All five datasets, trained checkpoints, evaluation results, supplementary materials and analysis notebooks will be deposited at **Zenodo** (deposit pending; corresponds to the MOSANIC paper submission, 2026).
+All five datasets, trained checkpoints, evaluation results, supplementary materials and analysis notebooks are archived at Zenodo: [10.5281/zenodo.21412186](https://doi.org/10.5281/zenodo.21412186).
 
 End-to-end retraining + evaluation for a single dataset:
 ```bash
@@ -163,7 +167,7 @@ mosanic evaluate   --config tissue_config.yaml
 
 ## Verbosity
 
-By default the package logs at `WARNING` level — minimal output. Increase verbosity with:
+By default the package logs at `WARNING` level, i.e. minimal output. Increase verbosity with:
 
 ```python
 import mosanic
@@ -176,22 +180,26 @@ mosanic.set_verbosity("silent")   # suppress everything
 
 ## Citation
 
-A manuscript describing MOSANIC is under review (2026). Citation details and the Zenodo DOI for the trained checkpoints, processed datasets, and evaluation outputs will be added on publication.
+If you use MOSANIC, please cite the preprint:
 
-<!-- Uncomment and complete on publication:
-@article{mosanic2026,
-  title   = {MOSANIC: Multi-mOdal Self-Attention Network for Intercellular Communication},
-  author  = {<author list>},
-  journal = {<journal pending>},
+> Das, D. and Mitra, P. Learning the spatial cell-cell communication network to decode multi-channel signalling and predict network-hub vulnerabilities with MOSANIC. *bioRxiv* (2026). https://doi.org/10.64898/2026.07.05.736582
+
+```bibtex
+@article{das2026mosanic,
+  title   = {Learning the spatial cell-cell communication network to decode multi-channel signalling and predict network-hub vulnerabilities with MOSANIC},
+  author  = {Das, Debraj and Mitra, Pralay},
+  journal = {bioRxiv},
   year    = {2026},
-  doi     = {10.5281/zenodo.XXXXXXX}
+  doi     = {10.64898/2026.07.05.736582}
 }
--->
+```
+
+Data, trained checkpoints and evaluation outputs are archived at Zenodo: [10.5281/zenodo.21412186](https://doi.org/10.5281/zenodo.21412186).
 
 
 ---
 
 ## License
 
-MIT — see [`LICENSE`](LICENSE). Pre-trained model weights inherit the same MIT licence.
+MIT, see [`LICENSE`](LICENSE). Pre-trained model weights inherit the same MIT licence.
 
