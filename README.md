@@ -1,6 +1,6 @@
 # MOSANIC
 
-**M**ulti-**O**mic **S**patial **A**ttention for **I**ntercellular **C**ommunication — a heterogeneous graph transformer for cell–cell communication (CCC) inference from spatial transcriptomics.
+**M**ulti-m**O**dal **S**elf-**A**ttention **N**etwork for **I**ntercellular **C**ommunication — a heterogeneous graph transformer for cell–cell communication (CCC) inference from spatial transcriptomics.
 
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 [![Python 3.9+](https://img.shields.io/badge/python-3.9+-blue.svg)](https://www.python.org/downloads/)
@@ -174,11 +174,11 @@ mosanic.set_verbosity("silent")   # suppress everything
 
 ---
 
-<!-- ## Citation
+## Citation
 
-If you use MOSANIC in your research, please cite:
+A manuscript describing MOSANIC is under review (2026). Citation details and the Zenodo DOI for the trained checkpoints, processed datasets, and evaluation outputs will be added on publication.
 
-```bibtex
+<!-- Uncomment and complete on publication:
 @article{mosanic2026,
   title   = {MOSANIC: Multi-mOdal Self-Attention Network for Intercellular Communication},
   author  = {<author list>},
@@ -186,9 +186,8 @@ If you use MOSANIC in your research, please cite:
   year    = {2026},
   doi     = {10.5281/zenodo.XXXXXXX}
 }
-``` -->
+-->
 
-The trained checkpoints, processed datasets, and evaluation outputs are archived at the Zenodo DOI above.
 
 ---
 

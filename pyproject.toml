@@ -56,10 +56,10 @@ dev = ["pytest", "pytest-cov", "black", "ruff", "mypy"]
 mosanic = "mosanic.cli:main"
 
 [project.urls]
-Homepage      = "https://github.com/<your-org>/MOSANIC"
-Documentation = "https://github.com/<your-org>/MOSANIC#readme"
-Repository    = "https://github.com/<your-org>/MOSANIC"
-"Bug Tracker" = "https://github.com/<your-org>/MOSANIC/issues"
+Homepage      = "https://github.com/debraj-55555/MOSANIC"
+Documentation = "https://github.com/debraj-55555/MOSANIC#readme"
+Repository    = "https://github.com/debraj-55555/MOSANIC"
+"Bug Tracker" = "https://github.com/debraj-55555/MOSANIC/issues"
 
 [tool.setuptools.packages.find]
 where   = ["."]
