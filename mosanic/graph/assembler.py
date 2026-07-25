@@ -100,7 +100,7 @@ class GraphAssembler:
         cell_type = _cell_type_tensor(s1.get("cell_types"))
 
         # ── Cell-cell edges ───────────────────────────────────────────────
-        # τ₁ contact removed: τ₁⊆τ₁ (100% overlap), absent in intestinal, fallback in mouse
+        # contact channel excluded: contact ⊆ secreted (100% overlap), absent in intestinal, fallback in mouse
         secreted_ei = s7["secreted_ei"]
         secreted_ea = _to_float_tensor(s7["secreted_ea"])
         met_cc_ei   = s8["met_cc_ei"]
@@ -203,7 +203,7 @@ class GraphAssembler:
             "n_expr_genes":   int(y_expr.shape[1]),
             "target_genes":   target_genes,
 
-            # Edge counts + dims  (τ₁ contact removed)
+            # Edge counts + dims  (contact channel excluded)
             "n_secreted_edges":      int(secreted_ei.shape[1]),
             "n_met_cc_edges":        int(met_cc_ei.shape[1]),
             "n_intra_edges":         int(intra_ei.shape[1]),

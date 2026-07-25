@@ -510,7 +510,8 @@ def _step6_node_features_full(step1, step5, step4_data, cfg):
 
 
 def _step7_typed_cell_edges(step2, step3, step5, cfg):
-    """Build τ₁ contact, τ₁ secreted, τ₂ metabolite cell-cell edges — LR and metabolite separate."""
+    """Build the cell-cell edges: τ₁ secreted (LR) and τ₂ metabolite (scFEA flux), kept separate.
+    A legacy 'contact' channel is also built here but excluded from the final graph (see edge_builder.py)."""
     from mosanic.graph.edge_builder import EdgeBuilder
 
     builder = EdgeBuilder(cfg)

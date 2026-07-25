@@ -84,7 +84,8 @@ class EdgeBuilder:
         gene_set: Set[str],
     ) -> dict:
         """
-        Build τ₁ contact and τ₁ secreted cell-cell edges using the LR database.
+        Build the cell-cell LR edges: the legacy 'contact' channel and the 'secreted'
+        channel (τ₁ in the final graph). Only 'secreted' is kept during assembly.
 
         Returns dict with:
             contact_ei  [2, E_c]    contact edge index
