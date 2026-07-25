@@ -20,7 +20,7 @@ Pipeline:
         |
     expression [N, n_genes]   <- PRIMARY prediction target
 
-Key improvement over src4:
+Key design points:
     - Attention on (gene, interacts, gene) edges = direct LR pair CCC score
     - No post-hoc gene-weighting correction needed
     - Gene identity (ESM-2 embeddings) visible to GNN -> richer semantics

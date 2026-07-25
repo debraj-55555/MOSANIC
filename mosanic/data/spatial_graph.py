@@ -2,7 +2,7 @@
 spatial_graph.py — Technology-Aware Spatial Graph Builder
 
 Builds spatial k-NN or radius graphs from processed spot/cell coordinates.
-Fixed from src3:
+Behaviour:
   - Technology-aware k and max_distance defaults
   - Distances normalised by spot_diameter (technology-specific)
   - MERFISH/cell-level technologies use radius-based graph by default

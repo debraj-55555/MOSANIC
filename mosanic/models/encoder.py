@@ -3,8 +3,7 @@ mosanic/models/encoder.py
 
 Heterogeneous Graph Transformer Encoder for MOSANIC.
 
-Extends src4's HetGTEncoder to handle 3 node types (cell, gene, metabolite)
-and 7 edge types.
+Handles 3 node types (cell, gene, metabolite) and 7 edge types.
 
 Architecture:
     Per-type input projections:

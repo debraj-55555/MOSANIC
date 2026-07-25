@@ -9,15 +9,18 @@ Graph structure:
     'gene'        x=[G, 1280]   ESM-2 protein embeddings
     'metabolite'  x=[M, 600]    ChemBERTa SMILES embeddings
 
-  Edge types (6):
+  Edge types (7):
     ('cell', 'secreted',       'cell')       τ₁  LR-secreted
     ('cell', 'metabolite',     'cell')       τ₂  scFEA flux-mediated  [SEPARATE from LR]
     ('cell', 'intracellular',  'cell')       τ₃  receptor PCA + flux self-loops
     ('cell', 'expresses',      'gene')       ε₁  top-K expression edges
     ('gene', 'interacts',      'gene')       ε₂  LR pair edges (KEY for CCC scoring)
     ('cell', 'flux',           'metabolite') ε₃  scFEA flux edges  [SEPARATE from LR]
-  NOTE: τ₁ contact removed — τ₁⊆τ₁ (100% topological overlap); absent in intestinal
-        cancer with no performance cost; distance-only fallback in mouse. Redundant.
+    ('metabolite', 'sensed_by','gene')       ε₄  metabolite→receptor sensing (MEBOCOST)
+  NOTE: the legacy 'contact' LR channel is intentionally NOT a separate edge — the contact
+        sub-graph is a ~100% topological subset of 'secreted' (adds no structure), is absent
+        in intestinal cancer at no performance cost, and falls back to distance-only in mouse.
+        The contact/secreted/ECM channel label is instead retained as features on ε₂.
 
 Primary target: y_expr [N, 200] log-normalized expression on 'cell' nodes.
 Auxiliary stored at graph level: y_lr, y_metab, lr_vocab, lr_pair_vocab, etc.

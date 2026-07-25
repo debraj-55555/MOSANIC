@@ -1,15 +1,23 @@
 """
-channel_classifier.py — Biological channel type assignment for LR pairs.
+channel_classifier.py — Biological signalling-channel label for each LR pair.
 
-Maps each LR pair to one of 4 channel types based on:
-  1. Existing annotation string (Secreted Signaling / Cell-Cell Contact / ECM-Receptor)
-  2. Gene family prefix heuristic (for unclassified pairs)
-  3. Fallback: 'secreted' (most common/conservative)
+Labels each ligand-receptor pair with its signalling channel, using:
+  1. The database's own interaction-type annotation, if present. The training catalogue
+     used in the paper (CellNEST) already tags pairs as secreted / contact / ECM;
+     common CellChat-style strings (Secreted Signaling / Cell-Cell Contact / ECM-Receptor)
+     are recognised too.
+  2. A gene-family prefix heuristic (for pairs with no annotation).
+  3. Fallback: 'secreted' (most common and most conservative).
 
-Channel types:
-  'contact'   — Juxtacrine / direct cell-cell contact (τ₁)
-  'secreted'  — Paracrine secreted signaling (τ₁)
-  'ecm'       — ECM-receptor interactions (τ₃)
+Channel labels:
+  'secreted'  — paracrine secreted signalling. This is the only LR channel kept in the
+                final model, where it becomes the cell-cell edge type τ₁.
+  'contact'   — juxtacrine / direct cell-cell contact.
+  'ecm'       — ECM-receptor interactions.
+Note: 'contact' and 'ecm' are labelled here for completeness, but they are NOT separate
+edges in the final 7-edge graph (contact is a topological subset of secreted, and ECM is
+sparse/absent in several datasets), so they are dropped during graph assembly. The paper's
+τ₃ edge is the intracellular self-loop, unrelated to these LR channel labels.
 """
 
 from typing import Optional

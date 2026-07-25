@@ -240,7 +240,7 @@ def _step3_lr_database(cfg):
 def _run_scfea(cfg, adata_path, scfea_balance_path):
     """Run scFEA from raw AnnData to produce a balance CSV.
 
-    Follows src5/preprocessing/scfea_runner.py pattern:
+    Pipeline:
       1. Export expression matrix as genes×cells CSV (scFEA input format).
       2. Call scFEA_gpu_safe.py via subprocess (isolated process, no import side-effects).
       3. Copy balance.csv to expected path.

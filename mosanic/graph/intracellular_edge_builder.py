@@ -24,8 +24,8 @@ Non-circularity:
   - Both are structural features (cell identity), not prediction targets
 
 Usage:
-    python -m src4.graph.intracellular_edge_builder \
-        --config src4/configs/breast_config.yaml \
+    python -m mosanic.graph.intracellular_edge_builder \
+        --config configs/breast_config.yaml \
         --dataset breast_new
 """
 

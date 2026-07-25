@@ -2,7 +2,7 @@
 lr_database.py — Ligand-Receptor and Metabolite Database Loader
 
 Loads, validates, normalises, and saves LR + metabolite databases.
-Fixed from src3:
+Behaviour:
   - Column names validated by name, not position (robust to column order changes)
   - Gene symbols normalised (uppercase, stripped)
   - Source database column tracked
@@ -32,7 +32,7 @@ logger = logging.getLogger(__name__)
 
 
 # ---------------------------------------------------------------------------
-# Known column aliases for LR databases (handles CellChat, OmniPath, NicheNet)
+# Known column aliases for LR databases (handles CellNEST, OmniPath, NicheNet, CellChat-format)
 # ---------------------------------------------------------------------------
 LR_COLUMN_ALIASES = {
     'ligand':     ['ligand', 'Ligand', 'LIGAND', 'source', 'ligand_symbol', 'gene_a'],
@@ -82,8 +82,9 @@ class DatabaseLoader:
         Accepts any CSV that has ligand + receptor columns (by name, not position).
         Normalises gene symbols to HGNC uppercase format.
 
-        Supported databases:
-            CellChatDB, OmniPath, NicheNet, CellNEST, LIANA
+        Supported databases (any CSV with ligand + receptor columns):
+            CellNEST (training catalogue used in the paper), OmniPath, NicheNet,
+            CellTalkDB, CellChat-format, LIANA
         """
         logger.debug(f"Loading LR database: {filepath}")
         filepath = Path(filepath)
@@ -447,7 +448,7 @@ def main():
     parser.add_argument('--lr_path',    required=True,  help='Path to LR database CSV')
     parser.add_argument('--met_path',   required=True,  help='Path to metabolite database TSV')
     parser.add_argument('--output_dir', required=True,  help='Output directory')
-    parser.add_argument('--source_db',  default='unknown', help='Database source name (e.g. CellChatDB)')
+    parser.add_argument('--source_db',  default='unknown', help='Database source name (e.g. CellNEST)')
     parser.add_argument('--gene_panel', default=None,
                         help='Path to filtered_genes.json for technology-aware filtering')
     parser.add_argument('--technology', default='visium',

@@ -1,25 +1,32 @@
 """
 mosanic/graph/edge_builder.py
 
-Builds all 7 edge types for the heterogeneous MOSANIC graph.
-LR database and metabolite database are kept SEPARATE throughout.
+Builds the candidate edge channels for the heterogeneous MOSANIC graph.
+The LR database and the metabolite database are kept SEPARATE throughout.
 
-Edge types:
-  (cell, contact,    cell)      τ₁  LR-contact, dist≤87µm
-  (cell, secreted,   cell)      τ₁  LR-secreted, dist≤150µm
-  (cell, metabolite, cell)      τ₂  scFEA flux-mediated, dist≤150µm  [SEPARATE from LR]
-  (cell, intracellular, cell)   τ₃  self-loops: receptor PCA + flux
-  (cell, expresses,  gene)      ε₁  top-K expression per cell
-  (gene, interacts,  gene)      ε₂  LR pair edges — KEY for direct CCC scoring
-  (cell, flux,       metabolite)ε₃  scFEA flux > q50 [SEPARATE from LR]
+The final assembled graph (see assembler.py) uses seven typed edges:
+  (cell, secreted,      cell)        τ₁  LR-secreted (paracrine), dist≤150µm
+  (cell, metabolite,    cell)        τ₂  scFEA flux-mediated, dist≤150µm  [SEPARATE from LR]
+  (cell, intracellular, cell)        τ₃  self-loops: receptor PCA + flux
+  (cell, expresses,     gene)        ε₁  top-K expression per cell
+  (gene, interacts,     gene)        ε₂  LR pair edges — KEY for direct CCC scoring
+  (cell, flux,          metabolite)  ε₃  scFEA flux > q50                  [SEPARATE from LR]
+  (metabolite, sensed_by, gene)      ε₄  metabolite→receptor sensing (MEBOCOST)
+
+Legacy channel — built for completeness but EXCLUDED from the final graph:
+  (cell, contact,       cell)            LR-contact, dist≤87µm. Its sub-graph is a ~100%
+                                         topological subset of 'secreted', so the assembler
+                                         drops it. The contact/secreted/ECM channel label
+                                         is instead kept as features on the ε₂ edge (below).
 
 Edge attr dimensions:
-  τ₁, τ₁     [E, 2]   [dist_norm, gaussian_weight]
+  τ₁         [E, 2]   [dist_norm, gaussian_weight]   (a contact edge, if built, shares this)
   τ₂         [E, 3]   [n_active_modules_norm, mean_flux_norm, dist_norm]
   τ₃         [N, d4]  [receptor_pca(32), scfea_flux(n_modules)]
   ε₁         [E, 3]   [expr_norm, is_ligand, is_receptor]
-  ε₂         [E, 3]   [is_contact, is_secreted, is_ecm]
+  ε₂         [E, 3]   [is_contact, is_secreted, is_ecm]   (LR channel label as edge features)
   ε₃         [E, 2]   [flux_norm, module_activity_frac]
+  ε₄         [E, 1]   [n_receptors_norm]
 """
 
 import logging
@@ -31,7 +38,7 @@ import torch
 
 log = logging.getLogger(__name__)
 
-# Reuse src4 typed edge builders — no duplication
+# Typed edge builders (see typed_edge_builder.py for channel definitions)
 from mosanic.graph.typed_edge_builder import (
     build_contact_edges,
     build_secreted_edges,
@@ -45,7 +52,11 @@ from mosanic.graph.typed_edge_builder import (
 
 class EdgeBuilder:
     """
-    Builds all 7 edge types for the MOSANIC heterogeneous graph.
+    Builds the edge channels for the MOSANIC heterogeneous graph: the seven typed
+    edges kept in the final graph (τ₁ secreted, τ₂ metabolite, τ₃ intracellular,
+    ε₁ cell→gene, ε₂ ligand→receptor, ε₃ cell→metabolite, ε₄ metabolite→receptor),
+    plus the legacy 'contact' cell-cell channel that the assembler excludes (see the
+    module docstring above).
 
     Args:
         cfg: config dict (spatial section used for thresholds)

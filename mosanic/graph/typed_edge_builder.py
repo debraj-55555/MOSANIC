@@ -1,11 +1,22 @@
 """
 typed_edge_builder.py — Build biology-typed edge sub-graphs from spatial k-NN base graph.
 
-Replaces distance-quartile routing (src4 original) with database-driven channel assignment:
-  contact    — CellChatDB 'contact' LR pairs, dist ≤ contact_threshold_um
-  secreted   — CellChatDB 'secreted' LR pairs, dist ≤ secreted_threshold_um
-  metabolite — scFEA high-flux sender + metabolite sensor in receiver, dist ≤ metabolite_threshold_um
-  ecm        — CellChatDB 'ecm' LR pairs, dist ≤ ecm_threshold_um
+Cell-cell channels are assigned from the training ligand-receptor catalogue's own
+interaction-type label. The catalogue used in the paper is CellNEST (which tags each
+human LR pair as secreted / contact / ECM; the mouse catalogue is NicheNet + CellTalkDB):
+  secreted   : secreted-signalling LR pairs, dist <= secreted_threshold_um.
+               This is the ONLY LR cell-cell channel kept in the final model (edge type tau1).
+  metabolite : scFEA high-flux sender + metabolite sensor in receiver, dist <= metabolite_threshold_um
+               (edge type tau2; built from flux, independent of the LR channels).
+  contact    : cell-contact LR pairs. Built here but EXCLUDED from the final graph, because the
+               contact sub-graph is a ~100% topological subset of the secreted sub-graph and adds
+               no new structure (dropped during assembly; see assembler.py).
+  ecm        : ECM-receptor LR pairs. Built here but EXCLUDED from the final graph, because it is
+               sparse or absent in several datasets (dropped during assembly; see assembler.py).
+
+The final model uses seven typed edges: tau1 secreted, tau2 metabolite-mediated,
+tau3 intracellular, eps1 cell->gene, eps2 ligand->receptor, eps3 cell->metabolite,
+eps4 metabolite->receptor. Only tau1/tau2 are produced by this module.
 
 Non-circularity guarantee:
   Edge EXISTENCE: LR database category + distance threshold + gene presence (boolean) OR

@@ -3,9 +3,8 @@ mosanic/training/trainer.py
 
 Trainer for MOSANIC model.
 
-Adapted from src4/training/hetgt_trainer.py.
-Key changes vs src4:
-  - No auxiliary edge-level tasks (MOSANIC drops EdgePredictorMultiTask)
+Training design:
+  - No auxiliary edge-level tasks (single objective, no EdgePredictorMultiTask)
   - Expression loss only (Huber by default, as per breast_config.yaml)
   - Model is MOSANIC with 3 node types + 7 edge types
   - No edge_train_mask / edge_val_mask needed for training
